@@ -34,6 +34,12 @@ subprojects {
     mavenCentral()
   }
 
+  configurations {
+    compileOnly {
+      extendsFrom annotationProcessor
+    }
+  }
+
   dependencies {
     implementation 'org.springframework.modulith:spring-modulith-starter-core'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

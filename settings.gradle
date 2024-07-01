@@ -1,3 +1,6 @@
 rootProject.name = 'UnifiedPlatform'
 
-include(':OnlineStoreAPI')
+include ':OnlineStoreAPI'
+include ':CommonDTOModule'
+include ':CommonLibrariesModule'
+

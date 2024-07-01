@@ -4,7 +4,7 @@ plugins {
   id 'io.spring.dependency-management'
 }
 
-group = 'com.lgzarturo.onlinestoreapi'
+group = 'com.lgzarturo.common.dto'
 version = '0.0.1'
 
 java {
@@ -22,12 +22,10 @@ ext {
 }
 
 dependencies {
-  implementation project(':CommonLibrariesModule')
-  implementation project(':CommonDTOModule')
-  implementation 'org.springframework.boot:spring-boot-starter-web'
-  implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-  runtimeOnly 'com.h2database:h2'
-  runtimeOnly 'com.mysql:mysql-connector-j'
+  compileOnly 'org.projectlombok:lombok'
+  annotationProcessor 'org.projectlombok:lombok'
+  testImplementation platform('org.junit:junit-bom:5.10.0')
+  testImplementation 'org.junit.jupiter:junit-jupiter'
 }
 
 dependencyManagement {
@@ -38,4 +36,8 @@ dependencyManagement {
 
 tasks.named('test') {
   useJUnitPlatform()
+}
+
+tasks.named("bootJar") {
+  enabled = false
 }
