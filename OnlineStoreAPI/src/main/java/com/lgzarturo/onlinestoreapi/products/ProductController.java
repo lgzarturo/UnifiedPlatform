@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import java.util.Objects;
 
@@ -29,7 +30,11 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<List<Product>> getProducts(Pageable pageable) {
-        return ResponseEntity.ok(productService.getProducts(pageable));
+        var products = productService.getProducts(pageable);
+        if (products.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(products);
     }
 
     @GetMapping("/{id}")
@@ -40,7 +45,8 @@ public class ProductController {
 
     @PostMapping
     public ResponseEntity<Product> saveProduct(@RequestBody Product product) {
-        return ResponseEntity.ok(productService.saveProduct(product));
+        var uri = URI.create("products/" + product.getId());
+        return ResponseEntity.created(uri).body(productService.saveProduct(product));
     }
 
     @PutMapping("/{id}")
@@ -196,8 +202,9 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteProduct(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
+        return ResponseEntity.noContent().build();
     }
 
 }
