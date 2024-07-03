@@ -2,6 +2,9 @@ package com.lgzarturo.onlinestoreapi.products;
 
 import com.lgzarturo.common.dto.products.DescriptionContent;
 import com.lgzarturo.common.dto.products.PriceChange;
+import com.lgzarturo.common.dto.products.PriceRequest;
+import com.lgzarturo.common.dto.products.StockRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,7 +12,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 
@@ -23,8 +25,8 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Product>> getProducts() {
-        return ResponseEntity.ok(productService.getProducts());
+    public ResponseEntity<List<Product>> getProducts(Pageable pageable) {
+        return ResponseEntity.ok(productService.getProducts(pageable));
     }
 
     @GetMapping("/{id}")
@@ -84,24 +86,24 @@ public class ProductController {
     }
 
     @PatchMapping("/{id}/increase")
-    public ResponseEntity<Product> addStock(@PathVariable Long id, @RequestBody Integer stock) {
+    public ResponseEntity<Product> addStock(@PathVariable Long id, @RequestBody StockRequest stock) {
         var product = productService.getProductById(id);
         if (product.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         var productValue = product.get();
-        productValue.setStock(productValue.getStock() + stock);
+        productValue.setStock(productValue.getStock() + stock.getQuantity());
         return ResponseEntity.ok(productService.saveProduct(productValue));
     }
 
     @PatchMapping("/{id}/decrease")
-    public ResponseEntity<Product> removeStock(@PathVariable Long id, @RequestBody Integer stock) {
+    public ResponseEntity<Product> removeStock(@PathVariable Long id, @RequestBody StockRequest stock) {
         var product = productService.getProductById(id);
         if (product.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         var productValue = product.get();
-        var stockUpdate = productValue.getStock() - stock;
+        var stockUpdate = productValue.getStock() - stock.getQuantity();
         productValue.setStock(Math.max(stockUpdate, 0));
         return ResponseEntity.ok(productService.saveProduct(productValue));
     }
@@ -129,13 +131,14 @@ public class ProductController {
     }
 
     @PatchMapping("/{id}/set-price")
-    public ResponseEntity<Product> setPrice(@PathVariable Long id, @RequestBody BigDecimal price) {
+    public ResponseEntity<Product> setPrice(@PathVariable Long id, @RequestBody PriceRequest price) {
         var product = productService.getProductById(id);
         if (product.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         var productValue = product.get();
-        productValue.setPrice(price);
+        productValue.setPrice(price.getAmount());
+        productValue.setCurrency(price.getCurrency());
         return ResponseEntity.ok(productService.saveProduct(productValue));
     }
 
@@ -146,6 +149,9 @@ public class ProductController {
             return ResponseEntity.notFound().build();
         }
         var productValue = product.get();
+        if (productValue.getCurrency() != null && !productValue.getCurrency().equals(priceChange.getCurrency())) {
+            return ResponseEntity.badRequest().build();
+        }
         return ResponseEntity.ok(productService.updatePrice(productValue, priceChange));
     }
 

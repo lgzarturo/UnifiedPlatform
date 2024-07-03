@@ -7,6 +7,7 @@ import com.lgzarturo.common.dto.products.ValueType;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.ast.Document;
 import org.jsoup.safety.Safelist;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -21,8 +22,8 @@ public class ProductService {
         this.productRepository = productRepository;
     }
 
-    public List<Product> getProducts() {
-        return productRepository.findAll();
+    public List<Product> getProducts(Pageable pageable) {
+        return productRepository.findAll(pageable).getContent();
     }
 
     public Product saveProduct(Product product) {
@@ -31,7 +32,7 @@ public class ProductService {
 
     public Product updatePrice(Product product, PriceChange priceChange) {
         var price = product.getPrice();
-        var value = priceChange.getValue();
+        var value = priceChange.getAmount();
         var valueType = priceChange.getValueType();
         var type = priceChange.getType();
         if (valueType == ValueType.AMOUNT) {

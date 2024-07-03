@@ -1,5 +1,6 @@
 package com.lgzarturo.onlinestoreapi.products;
 
+import com.lgzarturo.common.dto.common.Currency;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
@@ -24,12 +25,21 @@ public class Product {
     private String name;
     @Column(length = 8000, columnDefinition = "TEXT")
     private String description;
+    @Enumerated(EnumType.STRING)
+    private Currency currency = Currency.MXN;
     @Column(precision = 10, scale = 2)
     @NumberFormat(pattern = "$###,###,###.00", style = NumberFormat.Style.CURRENCY)
     private BigDecimal price;
+    @Transient
+    private String priceFormatted;
     private Integer stock = 0;
     private String imageUrl;
     private boolean active = true;
+
+    private String getPriceFormatted() {
+        var priceValue = price != null ? price : BigDecimal.ZERO;
+        return "$" + priceValue + " (" + currency + ")";
+    }
 
     @Override
     public final boolean equals(Object o) {
