@@ -1,6 +1,7 @@
 package com.lgzarturo.onlinestoreapi.products;
 
 import com.lgzarturo.common.dto.common.Currency;
+import com.lgzarturo.common.libs.CurrencyUtils;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.proxy.HibernateProxy;
@@ -8,6 +9,8 @@ import org.springframework.format.annotation.NumberFormat;
 
 import java.math.BigDecimal;
 import java.util.Objects;
+
+import static com.lgzarturo.common.libs.Constants.*;
 
 @Getter
 @Setter
@@ -23,22 +26,21 @@ public class Product {
     private String sku;
     @Column(nullable = false)
     private String name;
-    @Column(length = 8000, columnDefinition = "TEXT")
+    @Column(length = 8000, columnDefinition = TYPE_TEXT)
     private String description;
     @Enumerated(EnumType.STRING)
-    private Currency currency = Currency.MXN;
+    private Currency currency = Currency.valueOf(DEFAULT_CURRENCY);
     @Column(precision = 10, scale = 2)
-    @NumberFormat(pattern = "$###,###,###.00", style = NumberFormat.Style.CURRENCY)
+    @NumberFormat(pattern = CURRENCY_FORMAT, style = NumberFormat.Style.CURRENCY)
     private BigDecimal price;
     @Transient
     private String priceFormatted;
-    private Integer stock = 0;
+    private Integer stock = DEFAULT_STOCK;
     private String imageUrl;
     private boolean active = true;
 
     private String getPriceFormatted() {
-        var priceValue = price != null ? price : BigDecimal.ZERO;
-        return "$" + priceValue + " (" + currency + ")";
+        return CurrencyUtils.getFormattedPrice(currency.name(), price);
     }
 
     @Override

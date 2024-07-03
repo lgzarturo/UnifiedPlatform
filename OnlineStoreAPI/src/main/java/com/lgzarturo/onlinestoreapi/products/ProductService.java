@@ -86,13 +86,13 @@ public class ProductService {
         };
     }
 
-    private boolean validationMarkdownContent(String content) {
+    boolean validationMarkdownContent(String content) {
         Parser parser = Parser.builder().build();
         Document document = parser.parse(content);
         return document.hasChildren();
     }
 
-    private boolean validationHTMLContent(String content) {
+    boolean validationHTMLContent(String content) {
         try {
             org.jsoup.nodes.Document document = org.jsoup.Jsoup.parse(content);
             return document.hasText();
@@ -101,7 +101,7 @@ public class ProductService {
         }
     }
 
-    private String cleanHTMLContent(String content) {
+    String cleanHTMLContent(String content) {
         return org.jsoup.Jsoup.clean(content, Safelist.simpleText());
     }
 }

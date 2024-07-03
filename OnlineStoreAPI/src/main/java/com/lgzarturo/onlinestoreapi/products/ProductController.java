@@ -4,6 +4,7 @@ import com.lgzarturo.common.dto.products.DescriptionContent;
 import com.lgzarturo.common.dto.products.PriceChange;
 import com.lgzarturo.common.dto.products.PriceRequest;
 import com.lgzarturo.common.dto.products.StockRequest;
+import com.lgzarturo.common.libs.Constants;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,8 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
+
+import static com.lgzarturo.common.libs.Constants.*;
 
 @RestController
 @RequestMapping("/products")
@@ -161,11 +164,10 @@ public class ProductController {
         if (product.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        if (image.getSize() > 10485760) {
+        if (image.getSize() > Constants.MAX_FILE_SIZE) {
             return ResponseEntity.badRequest().build();
         }
-        String[] allowedMimeTypes = {"image/jpeg", "image/jpg", "image/png"};
-        if (!List.of(allowedMimeTypes).contains(image.getContentType())) {
+        if (!List.of(ALLOWED_MIME_TYPES).contains(image.getContentType())) {
             return ResponseEntity.badRequest().build();
         }
 
@@ -173,7 +175,7 @@ public class ProductController {
             BufferedImage bufferedImage = javax.imageio.ImageIO.read(image.getInputStream());
             int width = bufferedImage.getWidth();
             int height = bufferedImage.getHeight();
-            if (width > 1920 || height > 1080) {
+            if (width > MAX_IMAGE_WIDTH || height > MAX_IMAGE_HEIGHT) {
                 return ResponseEntity.badRequest().build();
             }
 
