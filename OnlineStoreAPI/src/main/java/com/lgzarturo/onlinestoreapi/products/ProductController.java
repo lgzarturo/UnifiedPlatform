@@ -89,7 +89,7 @@ public class ProductController {
         }
         var productValue = product.get();
         if (productService.isValidDescription(description)) {
-            return ResponseEntity.ok(productService.updateDescription(productValue, description));
+            return ResponseEntity.accepted().body(productService.updateDescription(productValue, description));
         }
         return ResponseEntity.badRequest().build();
     }

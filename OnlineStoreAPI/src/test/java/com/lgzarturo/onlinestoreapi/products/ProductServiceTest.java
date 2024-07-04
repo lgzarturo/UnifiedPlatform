@@ -69,15 +69,31 @@ class ProductServiceTest {
         product.setPrice(BigDecimal.valueOf(100));
 
         PriceChange increaseAmount = new PriceChange(Currency.MXN, BigDecimal.valueOf(10), ValueType.AMOUNT, PriceChangeType.INCREASE);
+        PriceChange decreaseAmount = new PriceChange(Currency.MXN, BigDecimal.valueOf(10), ValueType.AMOUNT, PriceChangeType.DECREASE);
         PriceChange decreasePercentage = new PriceChange(Currency.MXN, BigDecimal.valueOf(0.1), ValueType.PERCENTAGE, PriceChangeType.DECREASE); // 10%
+        PriceChange decreasePercentageWhenGreaterThanOne = new PriceChange(Currency.MXN, BigDecimal.valueOf(50), ValueType.PERCENTAGE, PriceChangeType.DECREASE);
+        PriceChange increasePercentage = new PriceChange(Currency.MXN, BigDecimal.valueOf(0.2), ValueType.PERCENTAGE, PriceChangeType.INCREASE);
+        PriceChange increasePercentageWhenGreaterThanOne = new PriceChange(Currency.MXN, BigDecimal.valueOf(25), ValueType.PERCENTAGE, PriceChangeType.INCREASE);
 
         when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Product increasedPriceProduct = productService.updatePrice(product, increaseAmount);
         assertEquals(0, BigDecimal.valueOf(110).compareTo(increasedPriceProduct.getPrice()));
 
+        Product decreasedPriceProductWithAmount = productService.updatePrice(product, decreaseAmount);
+        assertEquals(0, BigDecimal.valueOf(100).compareTo(decreasedPriceProductWithAmount.getPrice()));
+
         Product decreasedPriceProduct = productService.updatePrice(product, decreasePercentage);
         assertEquals(0, BigDecimal.valueOf(90).compareTo(decreasedPriceProduct.getPrice()));
+
+        Product decreasedPriceProductWithPercentage = productService.updatePrice(product, decreasePercentageWhenGreaterThanOne);
+        assertEquals(0, BigDecimal.valueOf(45).compareTo(decreasedPriceProductWithPercentage.getPrice()));
+
+        Product increasedPriceProductWithPercentage = productService.updatePrice(product, increasePercentage);
+        assertEquals(0, BigDecimal.valueOf(54).compareTo(increasedPriceProductWithPercentage.getPrice()));
+
+        Product increasedPriceProductWithPercentageWhenGreaterThanOne = productService.updatePrice(product, increasePercentageWhenGreaterThanOne);
+        assertEquals(0, BigDecimal.valueOf(67.50).compareTo(increasedPriceProductWithPercentageWhenGreaterThanOne.getPrice()));
     }
 
     @Test

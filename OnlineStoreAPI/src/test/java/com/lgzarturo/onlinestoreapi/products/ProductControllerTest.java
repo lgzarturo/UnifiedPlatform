@@ -1,8 +1,11 @@
 package com.lgzarturo.onlinestoreapi.products;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lgzarturo.common.dto.common.Currency;
 
+import com.lgzarturo.common.dto.products.ContentType;
+import com.lgzarturo.common.dto.products.DescriptionContent;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -147,6 +150,30 @@ public class ProductControllerTest {
                 .andExpect(jsonPath("$.description").value(product.getDescription()))
                 .andExpect(jsonPath("$.currency").value("MXN"))
                 .andExpect(jsonPath("$.price").value(product.getPrice()));
+    }
+
+    @Test
+    public void updateRichDescription() throws Exception {
+        Long id = 1L;
+        Product product = new Product();
+        product.setId(id);
+        product.setName("Product 1");
+        product.setDescription("Product 1");
+
+        DescriptionContent descriptionContent = new DescriptionContent();
+        descriptionContent.setContent("## Markdown **format**");
+        descriptionContent.setContentType(ContentType.MARKDOWN);
+
+        given(productService.getProductById(id)).willReturn(Optional.of(product));
+        given(productService.isValidDescription(descriptionContent)).willReturn(true);
+        product.setDescription(descriptionContent.getContent());
+        given(productService.updateDescription(product, descriptionContent)).willReturn(product);
+
+        mockMvc.perform(patch("/products/{id}/rich-description", id)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(descriptionContent))
+        ).andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.description").value(descriptionContent.getContent()));
     }
 
     @Test

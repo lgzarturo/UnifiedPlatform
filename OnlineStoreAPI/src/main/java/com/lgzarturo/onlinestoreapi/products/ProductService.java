@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,12 +44,22 @@ public class ProductService {
             }
         } else {
             if (type == PriceChangeType.INCREASE) {
+                if (value.compareTo(BigDecimal.ONE) > 0) {
+                    value = value.divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+                }
                 price = price.multiply(value.add(BigDecimal.ONE));
             } else {
-                price = price.multiply(BigDecimal.ONE.subtract(value));
+                if (value.compareTo(BigDecimal.ONE) > 0) {
+                    value = value.divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+                }
+                price = price.subtract(price.multiply(value));
             }
         }
-        product.setPrice(price);
+        if (price.compareTo(new BigDecimal(0)) > 0) {
+            product.setPrice(price);
+        } else {
+            product.setPrice(BigDecimal.ZERO);
+        }
         return productRepository.save(product);
     }
 
