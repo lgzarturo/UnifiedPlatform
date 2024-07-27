@@ -2,20 +2,24 @@ package com.lgzarturo.onlinestoreapi.products;
 
 import com.lgzarturo.common.dto.common.Currency;
 import com.lgzarturo.common.libs.CurrencyUtils;
+import com.lgzarturo.onlinestoreapi.categories.Category;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.format.annotation.NumberFormat;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 import static com.lgzarturo.common.libs.Constants.*;
 
-@Getter
-@Setter
-@ToString
-@RequiredArgsConstructor
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "products")
 public class Product {
@@ -35,9 +39,28 @@ public class Product {
     private BigDecimal price;
     @Transient
     private String priceFormatted;
-    private Integer stock = DEFAULT_STOCK;
+    private Integer stock;
     private String imageUrl;
-    private boolean active = true;
+    private boolean active;
+    @Enumerated(EnumType.STRING)
+    private ProductStatus status;
+    @Enumerated(EnumType.STRING)
+    private ProductDeleted deleted;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    void setPrePersist() {
+        active = true;
+        stock = DEFAULT_STOCK;
+        status = ProductStatus.NEW;
+        deleted = ProductDeleted.CREATED;
+    }
 
     private String getPriceFormatted() {
         return CurrencyUtils.getFormattedPrice(currency.name(), price);
